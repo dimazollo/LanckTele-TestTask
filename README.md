@@ -23,3 +23,5 @@
 
 ## Проверка результата:
 Для наглядного представления результата, необходимо использовать следующие данные (любое локальное хранение):
+- [currency_types.csv](https://github.com/dimazollo/LanckTele-TestTask/blob/main/currency_types.csv)
+- [currency_rates.csv](https://github.com/dimazollo/LanckTele-TestTask/blob/main/currency_rates.csv)
