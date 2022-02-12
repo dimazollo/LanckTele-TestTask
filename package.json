@@ -1,0 +1,17 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "start": "",
+    "test": "",
+    "build": "",
+    "front:start": "",
+    "front:test": "",
+    "front:build": "",
+    "back:start": "cd modules/backend && npm run start:dev",
+    "back:test": ""
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
