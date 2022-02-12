@@ -1,0 +1,10 @@
+# Common settings that generally should always be used with your language specific settings
+# Auto detect text files and perform LF normalization
+# https://www.davidlaing.com/2012/09/19/customise-your-gitattributes-to-become-a-git-ninja/
+*   text=auto
+
+# "linguist-generated" attribute comes from "linguist" library used by github:
+# https://github.com/github/linguist/blob/master/docs/overrides.md
+**/pnpm-lock.yaml               linguist-generated
+**/yarn.lock                    linguist-generated
+**/package-lock.json            linguist-generated
