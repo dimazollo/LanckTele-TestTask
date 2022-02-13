@@ -1,0 +1,7 @@
+{
+  "type": "better-sqlite3",
+  "database": "lanck-db.sqlite",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "logging": true,
+  "synchronize": false
+}
