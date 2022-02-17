@@ -1,2 +1,6 @@
+# JetBrains IDE files
 .idea
+*.iml
+
+# libraries
 /node_modules/
