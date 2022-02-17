@@ -1,9 +1,12 @@
-import counterReducer, {
+import {
   CounterState,
   increment,
   decrement,
   incrementByAmount,
+  counterSlice,
 } from './counterSlice';
+
+const counterReducer = counterSlice.reducer;
 
 describe('counter reducer', () => {
   const initialState: CounterState = {

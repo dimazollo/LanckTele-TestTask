@@ -5,9 +5,9 @@ import {
   decrement,
   increment,
   incrementByAmount,
-  incrementAsync,
-  incrementIfOdd,
   selectCount,
+  incrementIfOddAction,
+  incrementAsyncAction,
 } from './counterSlice';
 import styles from './Counter.module.css';
 
@@ -52,13 +52,27 @@ export function Counter() {
         </button>
         <button
           className={styles.asyncButton}
-          onClick={() => dispatch(incrementAsync(incrementValue))}
+          onClick={() =>
+            dispatch(
+              incrementAsyncAction({
+                incrementAmount: incrementValue,
+                currentValue: count,
+              }),
+            )
+          }
         >
           Add Async
         </button>
         <button
           className={styles.button}
-          onClick={() => dispatch(incrementIfOdd(incrementValue))}
+          onClick={() =>
+            dispatch(
+              incrementIfOddAction({
+                incrementAmount: incrementValue,
+                currentValue: count,
+              }),
+            )
+          }
         >
           Add If Odd
         </button>

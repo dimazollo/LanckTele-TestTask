@@ -1,6 +1,14 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState, AppThunk } from '../../app/store';
+import {
+  createAction,
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+} from '@reduxjs/toolkit';
+import { RootState, AppEpic } from '../../app/store';
 import { fetchCount } from './counterAPI';
+import { filter, map, switchMap } from 'rxjs/operators';
+import { from } from 'rxjs';
+import { ofType } from 'redux-observable';
 
 export interface CounterState {
   value: number;
@@ -25,6 +33,21 @@ export const incrementAsync = createAsyncThunk(
     return response.data;
   },
 );
+
+export const incrementAsyncAction = createAction<{
+  incrementAmount: number;
+  currentValue: number;
+}>('counter/incrementAsync');
+
+export const incrementAsyncEpic: AppEpic = ($action) =>
+  $action.pipe(
+    ofType(incrementAsyncAction.type),
+    switchMap((action) => {
+      return from(fetchCount(action.payload.currentValue)).pipe(
+        map((response) => incrementByAmount(response.data)),
+      );
+    }),
+  );
 
 export const counterSlice = createSlice({
   name: 'counter',
@@ -67,15 +90,18 @@ export const { increment, decrement, incrementByAmount } = counterSlice.actions;
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectCount = (state: RootState) => state.counter.value;
 
-// We can also write thunks by hand, which may contain both sync and async logic.
-// Here's an example of conditionally dispatching actions based on current state.
-export const incrementIfOdd =
-  (amount: number): AppThunk =>
-  (dispatch, getState) => {
-    const currentValue = selectCount(getState());
-    if (currentValue % 2 === 1) {
-      dispatch(incrementByAmount(amount));
-    }
-  };
+export const incrementIfOddAction = createAction<{
+  incrementAmount: number;
+  currentValue: number;
+}>('counter/incrementIfOdd');
 
-export default counterSlice.reducer;
+// We can also write epics by hand, which may contain both sync and async logic.
+// Here's an example of conditionally dispatching actions based on current state.
+export const incrementIfOddEpic: AppEpic = ($action) =>
+  $action.pipe(
+    filter(incrementIfOddAction.match),
+    filter((action) => {
+      return action.payload.currentValue % 2 === 1;
+    }),
+    map((action) => incrementByAmount(action.payload.incrementAmount)),
+  );
