@@ -3,37 +3,25 @@ import {
   ArrayUnique,
   IsAlpha,
   IsArray,
-  IsDate, IsNumber,
+  IsDateString,
   IsOptional,
-  IsString,
   Length,
   ValidateNested,
 } from 'class-validator';
-import {Type} from "class-transformer";
+import { Type } from 'class-transformer';
 
 class CurrencyFilter {
   @IsArray()
   @ArrayUnique()
   @ArrayNotEmpty()
-  @IsString({ each: true })
   @IsAlpha(undefined, { each: true })
   @Length(3, 3, { each: true })
   in: string[];
 }
 
 class DateFilter {
-  @IsDate()
-  @IsOptional()
-  eq?: Date;
-
-  // todo @dimazoll - remove or implement
-  // @IsDate()
-  // @IsOptional()
-  // lt?: Date;
-  //
-  // @IsDate()
-  // @IsOptional()
-  // gt?: Date;
+  @IsDateString()
+  eq: string;
 }
 
 export class FilterParams {

@@ -1,17 +1,14 @@
-import {
-  createConnection,
-  getRepository,
-} from 'typeorm';
-import { seedCurrencyRate, seedCurrencyType } from '../utils/seeds';
+import { createConnection, getRepository } from 'typeorm';
+import { seedCurrencyRate, seedCurrencyType } from '../util/seed';
 import { CurrencyRate, CurrencyType } from '../currency/entity';
 
 async function seedDb(): Promise<void> {
   const connection = await createConnection({
     type: 'better-sqlite3',
     database: 'lanck-db.sqlite',
-    entities: [CurrencyType, CurrencyRate]
+    entities: [CurrencyType, CurrencyRate],
   });
-  await connection.synchronize(true)
+  await connection.synchronize(true);
 
   const currencyTypes = await seedCurrencyType();
   const saveResult1 = await getRepository(CurrencyType).save(currencyTypes);
@@ -22,4 +19,4 @@ async function seedDb(): Promise<void> {
   console.log('currencyRates saving result: ', saveResult2);
 }
 
-seedDb()
+seedDb();

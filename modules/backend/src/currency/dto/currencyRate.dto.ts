@@ -1,6 +1,6 @@
 export class CurrencyRateDto {
   id: string;
-  currencyCode: string;
-  currencyRate: number;
-  startDate: Date;
+  currency_code: string;
+  currency_rate: number;
+  start_date: Date;
 }

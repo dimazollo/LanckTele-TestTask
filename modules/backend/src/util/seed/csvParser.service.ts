@@ -10,7 +10,7 @@ export function readCsv<I, O>(
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', (row) => {
-        const mapped = rowMapper(row)
+        const mapped = rowMapper(row);
         data.push(mapped);
       })
       .on('end', () => {
