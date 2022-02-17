@@ -2,10 +2,10 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "start": "",
+    "start": "lerna run --parallel start:dev",
     "test": "",
     "build": "",
-    "front:start": "",
+    "front:start": "cd modules/frontend && npm run start:dev",
     "front:test": "",
     "front:build": "",
     "back:start": "cd modules/backend && npm run start:dev",
