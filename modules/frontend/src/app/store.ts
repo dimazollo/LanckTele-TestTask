@@ -1,10 +1,10 @@
 import { configureStore, combineReducers, AnyAction } from '@reduxjs/toolkit';
-import { counterSlice } from '../features/counter/counterSlice';
 import { createEpicMiddleware, Epic } from 'redux-observable';
 import { rootEpic } from './epics';
+import { currencySlice } from "../features/currency/currencySlice";
 
 const reducer = combineReducers({
-  counter: counterSlice.reducer,
+  currency: currencySlice.reducer
 });
 
 const epicMiddleware = createEpicMiddleware<
@@ -17,12 +17,12 @@ const epicMiddleware = createEpicMiddleware<
 export const store = configureStore({
   reducer,
   middleware: (getDefaultMiddleware) => {
-    return [...getDefaultMiddleware({ thunk: false })];
+    return [...getDefaultMiddleware({ thunk: false }), epicMiddleware];
   },
 });
 
 export type AppDispatch = typeof store.dispatch;
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof reducer>;
 export type AppEpic = Epic<AnyAction, AnyAction, RootState, unknown>;
 
 epicMiddleware.run(rootEpic);

@@ -13,7 +13,7 @@ export async function seedCurrencyRate() {
 
     return {
       currency_id: parseInt(val.currency_id, 10),
-      start_date: new Date(year, month - 1, date),
+      start_date: new Date(Date.UTC(year, month - 1, date)),
       rate: parseFloat(val.rate),
     };
   };

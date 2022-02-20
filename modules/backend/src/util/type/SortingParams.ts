@@ -3,8 +3,8 @@ import { getSortableColumnsFromReflection } from '../reflection';
 import { CurrencyRate, CurrencyType } from '../../currency/entity';
 
 export enum SortingOrderEnum {
-  asc = 'ASC',
-  desc = 'DESC',
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 const sortingKeyValues = [CurrencyRate, CurrencyType].flatMap((constructor) =>

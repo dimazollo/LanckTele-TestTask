@@ -1,12 +1,18 @@
 import { combineEpics } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
-import {
-  incrementAsyncEpic,
-  incrementIfOddEpic,
-} from '../features/counter/counterSlice';
-import { AppEpic } from './store';
 
-const epics = [incrementIfOddEpic, incrementAsyncEpic];
+import { AppEpic } from './store';
+import {
+  fetchCurrencyCodesEpic,
+  fetchCurrencyDataEpic,
+  initCurrencySliceEpic,
+} from '../features/currency/currencySlice';
+
+const epics = [
+  initCurrencySliceEpic,
+  fetchCurrencyDataEpic,
+  fetchCurrencyCodesEpic,
+];
 
 export const rootEpic: AppEpic = (action$, state$, deps) => {
   const combinedEpic = combineEpics(...epics);

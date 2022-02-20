@@ -1,15 +1,14 @@
 import React from 'react';
-import './App.css';
-import { CurrencyTable } from './features/currencyRate/CurrencyTable';
+import { CurrencyTable } from './features/currency/CurrencyTable';
 
 function App() {
   return (
-    <>
-      <h1 className="text-3xl font-bold underline text-blue-600">
-        Hello world!
+    <div className="flex flex-col items-center">
+      <h1 className="text-3xl font-bold underline text-blue-600 mb-3">
+        Currency Rates
       </h1>
       <CurrencyTable />
-    </>
+    </div>
   );
 }
 

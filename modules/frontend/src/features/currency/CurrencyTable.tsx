@@ -1,55 +1,68 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Column, useTable } from 'react-table';
 import { CurrencyRowData } from './types';
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useSearchParams } from 'react-router-dom';
+import { initCurrencySlice, selectRowData } from "./currencySlice";
 
-export function CurrencyTable() {
-  const data = React.useMemo(
-    (): CurrencyRowData[] => [
-      {
-        currency: 'EUR',
-        rate: '1.1',
-        date: '07.08.2021',
-      },
-      {
-        currency: 'RUR',
-        rate: '0.013',
-        date: '08.08.2021',
-      },
-      {
-        currency: 'GBP',
-        rate: '1.3',
-        date: '06.08.2021',
-      },
-    ],
-    [],
-  );
+export interface CurrencyTableProps {
+  className?: string;
+}
 
-  const columns = React.useMemo(
-    (): Column<CurrencyRowData>[] => [
-      {
-        Header: 'Currency',
-        accessor: 'currency', // accessor is the "key" in the data
-      },
-      {
-        Header: 'Rate',
-        accessor: 'rate',
-      },
-      {
-        Header: 'Date',
-        accessor: 'date',
-      },
-    ],
-    [],
-  );
+// const data: CurrencyRowData[] = [
+//   {
+//     currencyCode: 'EUR',
+//     currencyRate: 1.1,
+//     startDate: '07.08.2021',
+//   },
+//   {
+//     currencyCode: 'RUR',
+//     currencyRate: 0.013,
+//     startDate: '08.08.2021',
+//   },
+//   {
+//     currencyCode: 'GBP',
+//     currencyRate: 1.3,
+//     startDate: '06.08.2021',
+//   },
+// ];
+
+const columns: Column<CurrencyRowData>[] = [
+  {
+    Header: 'Currency',
+    accessor: 'currencyCode', // accessor is the "key" in the data
+  },
+  {
+    Header: 'Rate',
+    accessor: 'currencyRate',
+  },
+  {
+    Header: 'Date',
+    accessor: 'startDate',
+  },
+];
+
+export function CurrencyTable(props: CurrencyTableProps) {
+  const dispatch = useAppDispatch();
+  const rowData = useAppSelector(selectRowData)
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    dispatch(initCurrencySlice());
+  }, []);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable({
       columns,
-      data,
+      data: rowData,
     });
 
   return (
-    <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
+    <table
+      {...getTableProps()}
+      className={props.className}
+      style={{ border: 'solid 1px blue' }}
+    >
       <thead>
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>

@@ -6,15 +6,19 @@ import { IntersectionType } from '@nestjs/mapped-types';
 import { SortingOrderEnum, SortingParams } from '../util/type/SortingParams';
 import { CurrencyRateDto } from './dto/currencyRate.dto';
 
-class GetCurrenciesQueryParams extends IntersectionType(
+class GetCurrencyQueryParams extends IntersectionType(
   FilterParams,
   PaginationParams,
   SortingParams,
 ) {}
 
-interface GetCurrenciesRatesResponse {
+interface GetCurrencyRatesResponse {
   items: CurrencyRateDto[];
   total: number;
+}
+
+interface GetCurrencyTypesResponse {
+  items: string[];
 }
 
 @Controller('currency')
@@ -23,23 +27,33 @@ export class CurrencyController {
 
   constructor(private readonly currencyService: CurrencyService) {}
 
-  @Get('/rate')
-  async getCurrenciesRates(
-    @Query() query: GetCurrenciesQueryParams,
-  ): Promise<GetCurrenciesRatesResponse> {
+  @Get('/types')
+  async getCurrencyTypes(): Promise<GetCurrencyTypesResponse> {
+    const currencyTypes = await this.currencyService.getCurrencyTypes();
+    const items = currencyTypes.map((item) => item.currency_code);
+    return { items };
+  }
+
+  @Get('/rates')
+  async getCurrencyRates(
+    @Query() query: GetCurrencyQueryParams,
+  ): Promise<GetCurrencyRatesResponse> {
     // todo @dimazoll - remove logger
     this.logger.debug('queryParams: ' + JSON.stringify(query, null, 2));
+    const paginationParams = { limit: query.limit, offset: query.offset };
+    const filterParams = { date: query.date, currency: query.currency };
     const sortingRules = (query.sort_by ?? []).reduce((acc, item) => {
       const [column, order] = item.split('.');
-      acc[column] = order.toUpperCase() || SortingOrderEnum.asc;
+      acc[column] = order || SortingOrderEnum.ASC;
       return acc;
     }, {});
 
-    const [rates, total] = await this.currencyService.getCurrenciesRates(
-      { limit: query.limit, offset: query.offset },
+    const [rates, total] = await this.currencyService.getCurrencyRates(
+      paginationParams,
       sortingRules,
-      { date: query.date, currency: query.currency },
+      filterParams,
     );
+
     return {
       items: rates.map((item) => {
         return {

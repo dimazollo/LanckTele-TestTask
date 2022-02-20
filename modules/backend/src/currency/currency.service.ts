@@ -18,9 +18,9 @@ export class CurrencyService {
     private connection: Connection,
   ) {}
 
-  async getCurrenciesRates(
+  async getCurrencyRates(
     paginationParams: PaginationParams,
-    sortingParams: Record<string, SortingOrderEnum.asc | SortingOrderEnum.desc>,
+    sortingParams: Record<string, SortingOrderEnum.ASC | SortingOrderEnum.DESC>,
     filterParams: FilterParams,
   ): Promise<[CurrencyRate[], number]> {
     const defaultItemsLimit = 5;
@@ -43,10 +43,6 @@ export class CurrencyService {
       .leftJoin('currency_rate.currency_type', 'currency_type');
 
     if (filterParams.date) {
-      // todo @dimazoll - need to build query using query builder
-      // select max(start_date), * from currency_rate
-      // where start_date <= '2021-07-10 21:00:00.000'
-      // group by currency_id
       queryBuilder = queryBuilder
         .andWhere('start_date <= :date', { date: filterParams.date.eq })
         .groupBy('currency_rate.currency_id');
@@ -61,14 +57,13 @@ export class CurrencyService {
       );
     }
 
-    // todo @dimazoll - use connection for that purpose
     const [{ cnt }] = await this.connection
       .createQueryRunner()
       .query(
         'SELECT COUNT(*) AS cnt FROM (' +
           queryBuilder.getQuery().replaceAll(/:\w+/gm, '?') +
           ')',
-        [filterParams.date?.eq, filterParams?.currency?.in].filter(Boolean),
+        [filterParams.date?.eq, filterParams.currency?.in].filter(Boolean),
       );
 
     queryBuilder = queryBuilder.orderBy(sortingParams);
@@ -92,8 +87,10 @@ export class CurrencyService {
     });
     this.currencyRateRepository.create();
 
-    // todo @dimazoll - remove logger
-    this.logger.log('items: ' + JSON.stringify(items, null, 2));
     return [items, cnt];
+  }
+
+  async getCurrencyTypes(): Promise<CurrencyType[]> {
+    return await this.currencyTypeRepository.find();
   }
 }
