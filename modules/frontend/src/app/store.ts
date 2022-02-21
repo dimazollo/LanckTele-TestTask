@@ -1,10 +1,10 @@
 import { configureStore, combineReducers, AnyAction } from '@reduxjs/toolkit';
 import { createEpicMiddleware, Epic } from 'redux-observable';
 import { rootEpic } from './epics';
-import { currencySlice } from "../features/currency/currencySlice";
+import { currencySlice } from '../features/currency/currencySlice';
 
 const reducer = combineReducers({
-  currency: currencySlice.reducer
+  currency: currencySlice.reducer,
 });
 
 const epicMiddleware = createEpicMiddleware<

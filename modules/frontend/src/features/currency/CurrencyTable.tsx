@@ -1,9 +1,19 @@
-import React, { useEffect } from 'react';
-import { Column, useTable } from 'react-table';
+import React, { useCallback, useEffect } from 'react';
+import { Column, useBlockLayout, useTable } from 'react-table';
 import { CurrencyRowData } from './types';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { initCurrencySlice, selectRowData } from './currencySlice';
+import {
+  fetchCurrencyDataAction,
+  initCurrencySlice,
+  selectRowData,
+  selectRowIds,
+} from './currencySlice';
+import { FixedSizeList } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import './currency.css';
 import { classnames } from '@bem-react/classnames';
+import InfiniteLoader from 'react-window-infinite-loader';
+import { scrollbarWidth } from '../../utils/scrollbarWidth';
 
 export interface CurrencyTableProps {
   className?: string;
@@ -27,69 +37,115 @@ const columns: Column<CurrencyRowData>[] = [
 export function CurrencyTable(props: CurrencyTableProps) {
   const dispatch = useAppDispatch();
   const rowData = useAppSelector(selectRowData);
+  const totalCount = useAppSelector((state) => state.currency.total);
+
+  const defaultColumn = React.useMemo(
+    () => ({
+      width: 100,
+    }),
+    [],
+  );
+
+  const loadMoreItems = useCallback((startIndex: number, stopIndex: number) => {
+    dispatch(
+      fetchCurrencyDataAction({
+        paging: { limit: stopIndex - startIndex + 1, offset: startIndex },
+      }),
+    );
+  }, []);
 
   useEffect(() => {
     dispatch(initCurrencySlice());
   }, []);
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    totalColumnsWidth,
+    prepareRow,
+  } = useTable(
+    {
       columns,
       data: rowData,
-    });
+      defaultColumn,
+    },
+    useBlockLayout,
+  );
+
+  const RenderRow = React.useCallback(
+    ({ index, style }) => {
+      const row = rows[index];
+      if (row === undefined) {
+        return null;
+      }
+      prepareRow(row);
+      return (
+        <div
+          {...row.getRowProps({
+            style,
+          })}
+          className="tr"
+        >
+          {row.cells.map((cell) => {
+            return (
+              <div {...cell.getCellProps()} className="td">
+                {cell.render('Cell')}
+              </div>
+            );
+          })}
+        </div>
+      );
+    },
+    [prepareRow, rows],
+  );
+
+  const ids = useAppSelector(selectRowIds);
+  const isItemLoaded = React.useCallback(
+    (index: number): boolean => {
+      return index >= totalCount || index < ids.length;
+    },
+    [ids, totalCount],
+  );
 
   return (
-    <div className="flex flex-col">
-      <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-        <div className="shadow contain-paint border-b border-gray-200 sm:rounded-lg">
-          <table
-            {...getTableProps()}
-            className={classnames(
-              props.className,
-              'min-w-full divide-y divide-gray-200',
-            )}
-          >
-            <thead className="bg-gray-50 sticky top-0">
-              {headerGroups.map((headerGroup) => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                  {headerGroup.headers.map((column) => (
-                    <th
-                      {...column.getHeaderProps()}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {column.render('Header')}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody
-              {...getTableBodyProps()}
-              className="bg-white divide-y divide-gray-200"
+    <div {...getTableProps()} className={classnames(props.className)}>
+      <div>
+        {headerGroups.map((headerGroup) => (
+          <div {...headerGroup.getHeaderGroupProps()} className="tr">
+            {headerGroup.headers.map((column) => (
+              <div {...column.getHeaderProps()} className="th">
+                {column.render('Header')}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div {...getTableBodyProps()} className={'h-full'}>
+        <AutoSizer disableWidth>
+          {({ height }) => (
+            <InfiniteLoader
+              isItemLoaded={isItemLoaded}
+              loadMoreItems={loadMoreItems}
+              itemCount={totalCount}
             >
-              {rows.map((row, idx) => {
-                prepareRow(row);
-                return (
-                  <tr
-                    {...row.getRowProps()}
-                    className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                  >
-                    {row.cells.map((cell) => {
-                      return (
-                        <td
-                          {...cell.getCellProps()}
-                          className="px-6 py-2 whitespace-nowrap text-sm text-gray-900"
-                        >
-                          {cell.render('Cell')}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+              {({ onItemsRendered, ref }) => (
+                <FixedSizeList
+                  height={height}
+                  width={totalColumnsWidth + scrollbarWidth()}
+                  itemCount={totalCount}
+                  itemSize={35}
+                  onItemsRendered={onItemsRendered}
+                  ref={ref}
+                >
+                  {RenderRow}
+                </FixedSizeList>
+              )}
+            </InfiniteLoader>
+          )}
+        </AutoSizer>
       </div>
     </div>
   );

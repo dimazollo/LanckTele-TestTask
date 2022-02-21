@@ -46,6 +46,7 @@ export const currencySlice = createSlice({
         }
         state.rowData[currencyItem.id] = currencyItem;
       });
+      state.total = action.payload.total;
     },
     updateCurrencyTypes: (
       state: Draft<CurrencyState>,
@@ -71,6 +72,8 @@ export const selectRowData = (state: RootState): CurrencyRowData[] =>
     };
   });
 
+export const selectRowIds = (state: RootState): Id[] => state.currency.rowIds;
+
 // Epic section
 export const initCurrencySlice = createAction('currency/Init');
 
@@ -81,7 +84,7 @@ export const initCurrencySliceEpic: AppEpic = (action$) =>
       fetchCurrencyCodesAction(),
       // todo @dimazoll - use default params object in this case.
       //  Next rows must be loaded lazily.
-      fetchCurrencyDataAction({ paging: { limit: 50 } }),
+      fetchCurrencyDataAction(),
     ]),
   );
 
