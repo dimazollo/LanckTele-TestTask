@@ -77,7 +77,12 @@ export const initCurrencySlice = createAction('currency/Init');
 export const initCurrencySliceEpic: AppEpic = (action$) =>
   action$.pipe(
     filter(initCurrencySlice.match),
-    concatMap(() => [fetchCurrencyCodesAction(), fetchCurrencyDataAction()]),
+    concatMap(() => [
+      fetchCurrencyCodesAction(),
+      // todo @dimazoll - use default params object in this case.
+      //  Next rows must be loaded lazily.
+      fetchCurrencyDataAction({ paging: { limit: 50 } }),
+    ]),
   );
 
 export const fetchCurrencyCodesAction = createAction(

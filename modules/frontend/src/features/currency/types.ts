@@ -1,4 +1,4 @@
-export type CurrencyRowData = Omit<CurrencyData, 'id'>
+export type CurrencyRowData = Omit<CurrencyData, 'id'>;
 
 export type CurrencyType = string;
 export type Id = string;
@@ -26,9 +26,9 @@ export interface PagingParams {
 export type SortingParams = Record<SortingColumnEnum, SortingOrderEnum>;
 
 export interface FetchCurrencyDataParameters {
-  filters: FilterParams;
-  sorting: Partial<SortingParams>;
-  paging: Partial<PagingParams>;
+  filters?: FilterParams;
+  sorting?: Partial<SortingParams>;
+  paging?: Partial<PagingParams>;
 }
 
 export interface CurrencyData {
@@ -40,7 +40,7 @@ export interface CurrencyData {
 
 export interface UpdateCurrencyRowData {
   items: CurrencyData[];
-  total: number
+  total: number;
 }
 
 export interface CurrencyRateDto {

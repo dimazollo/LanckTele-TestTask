@@ -7,23 +7,39 @@ import {
 } from './types';
 
 export const fetchCurrencyData = async (
-  params: FetchCurrencyDataParameters = {
+  params?: FetchCurrencyDataParameters,
+): Promise<UpdateCurrencyRowData> => {
+  let effectiveParams: Required<FetchCurrencyDataParameters> = {
     filters: {},
     sorting: {},
     paging: {},
-  },
-): Promise<UpdateCurrencyRowData> => {
-  const sortBy = getTypedObjectKeys(params.sorting).map(
-    (key) => `${key}.${params.sorting[key]}`,
+  };
+
+  if (params) {
+    effectiveParams = getTypedObjectKeys(effectiveParams).reduce<
+      Required<FetchCurrencyDataParameters>
+    >((acc, key) => {
+      acc[key] = {
+        ...effectiveParams[key],
+        ...(params[key] ?? {}),
+      };
+      return acc;
+    }, effectiveParams);
+  }
+
+  const sortBy = getTypedObjectKeys(effectiveParams.sorting).map(
+    (key) => `${key}.${effectiveParams.sorting[key]}`,
   );
   const preparedParams = {
     sort_by: sortBy.length > 0 ? sortBy : undefined,
-    currency: params.filters.currency
-      ? { in: params.filters.currency }
+    currency: effectiveParams.filters.currency
+      ? { in: effectiveParams.filters.currency }
       : undefined,
-    date: params.filters.date ? { eq: params.filters.date } : undefined,
-    limit: params.paging.limit,
-    offset: params.paging.offset,
+    date: effectiveParams.filters.date
+      ? { eq: effectiveParams.filters.date }
+      : undefined,
+    limit: effectiveParams.paging.limit,
+    offset: effectiveParams.paging.offset,
   };
 
   const { data } = await httpClient.get<{
@@ -32,6 +48,7 @@ export const fetchCurrencyData = async (
   }>('/currency/rates', {
     params: preparedParams,
   });
+
   return {
     items: data.items.map((item) => ({
       id: item.id,

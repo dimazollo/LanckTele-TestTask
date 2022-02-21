@@ -1,31 +1,13 @@
 import React, { useEffect } from 'react';
 import { Column, useTable } from 'react-table';
 import { CurrencyRowData } from './types';
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { useSearchParams } from 'react-router-dom';
-import { initCurrencySlice, selectRowData } from "./currencySlice";
+import { initCurrencySlice, selectRowData } from './currencySlice';
 
 export interface CurrencyTableProps {
   className?: string;
 }
-
-// const data: CurrencyRowData[] = [
-//   {
-//     currencyCode: 'EUR',
-//     currencyRate: 1.1,
-//     startDate: '07.08.2021',
-//   },
-//   {
-//     currencyCode: 'RUR',
-//     currencyRate: 0.013,
-//     startDate: '08.08.2021',
-//   },
-//   {
-//     currencyCode: 'GBP',
-//     currencyRate: 1.3,
-//     startDate: '06.08.2021',
-//   },
-// ];
 
 const columns: Column<CurrencyRowData>[] = [
   {
@@ -44,7 +26,7 @@ const columns: Column<CurrencyRowData>[] = [
 
 export function CurrencyTable(props: CurrencyTableProps) {
   const dispatch = useAppDispatch();
-  const rowData = useAppSelector(selectRowData)
+  const rowData = useAppSelector(selectRowData);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
