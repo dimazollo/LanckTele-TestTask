@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { Column, useTable } from 'react-table';
 import { CurrencyRowData } from './types';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { useSearchParams } from 'react-router-dom';
 import { initCurrencySlice, selectRowData } from './currencySlice';
+import { classnames } from '@bem-react/classnames';
 
 export interface CurrencyTableProps {
   className?: string;
@@ -27,7 +27,6 @@ const columns: Column<CurrencyRowData>[] = [
 export function CurrencyTable(props: CurrencyTableProps) {
   const dispatch = useAppDispatch();
   const rowData = useAppSelector(selectRowData);
-  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     dispatch(initCurrencySlice());
@@ -40,53 +39,58 @@ export function CurrencyTable(props: CurrencyTableProps) {
     });
 
   return (
-    <table
-      {...getTableProps()}
-      className={props.className}
-      style={{ border: 'solid 1px blue' }}
-    >
-      <thead>
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <th
-                {...column.getHeaderProps()}
-                style={{
-                  borderBottom: 'solid 3px red',
-                  background: 'aliceblue',
-                  color: 'black',
-                  fontWeight: 'bold',
-                }}
-              >
-                {column.render('Header')}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row) => {
-          prepareRow(row);
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map((cell) => {
+    <div className="flex flex-col">
+      <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+        <div className="shadow contain-paint border-b border-gray-200 sm:rounded-lg">
+          <table
+            {...getTableProps()}
+            className={classnames(
+              props.className,
+              'min-w-full divide-y divide-gray-200',
+            )}
+          >
+            <thead className="bg-gray-50 sticky top-0">
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column) => (
+                    <th
+                      {...column.getHeaderProps()}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {column.render('Header')}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody
+              {...getTableBodyProps()}
+              className="bg-white divide-y divide-gray-200"
+            >
+              {rows.map((row, idx) => {
+                prepareRow(row);
                 return (
-                  <td
-                    {...cell.getCellProps()}
-                    style={{
-                      padding: '10px',
-                      border: 'solid 1px gray',
-                      background: 'papayawhip',
-                    }}
+                  <tr
+                    {...row.getRowProps()}
+                    className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                   >
-                    {cell.render('Cell')}
-                  </td>
+                    {row.cells.map((cell) => {
+                      return (
+                        <td
+                          {...cell.getCellProps()}
+                          className="px-6 py-2 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          {cell.render('Cell')}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
