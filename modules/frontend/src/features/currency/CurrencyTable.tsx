@@ -1,12 +1,19 @@
-import React, { useCallback, useEffect } from 'react';
-import { Column, useBlockLayout, useTable } from 'react-table';
-import { CurrencyRowData } from './types';
+import React, { useCallback, useEffect, useRef } from 'react';
+import isEqual from 'lodash.isequal';
+import { Column, useBlockLayout, useSortBy, useTable } from 'react-table';
+import {
+  CurrencyRowData,
+  SortingColumnEnum,
+  SortingOrderEnum,
+  SortingParams,
+} from './types';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   fetchCurrencyDataAction,
-  initCurrencySlice,
+  initCurrencyDataAction,
   selectRowData,
   selectRowIds,
+  updateSortingAction,
 } from './currencySlice';
 import { FixedSizeList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -34,10 +41,20 @@ const columns: Column<CurrencyRowData>[] = [
   },
 ];
 
+const frontToBackColumnNamesMap: Record<
+  keyof CurrencyRowData,
+  SortingColumnEnum
+> = {
+  currencyCode: SortingColumnEnum.CURRENCY_CODE,
+  currencyRate: SortingColumnEnum.CURRENCY_RATE,
+  startDate: SortingColumnEnum.START_DATE,
+};
+
 export function CurrencyTable(props: CurrencyTableProps) {
   const dispatch = useAppDispatch();
   const rowData = useAppSelector(selectRowData);
   const totalCount = useAppSelector((state) => state.currency.total);
+  const infiniteLoaderRef = useRef<InfiniteLoader>(null);
 
   const defaultColumn = React.useMemo(
     () => ({
@@ -46,17 +63,22 @@ export function CurrencyTable(props: CurrencyTableProps) {
     [],
   );
 
-  const loadMoreItems = useCallback((startIndex: number, stopIndex: number) => {
-    dispatch(
-      fetchCurrencyDataAction({
-        paging: { limit: stopIndex - startIndex + 1, offset: startIndex },
-      }),
-    );
-  }, []);
-
   useEffect(() => {
-    dispatch(initCurrencySlice());
-  }, []);
+    dispatch(initCurrencyDataAction());
+  }, [dispatch]);
+
+  const loadMoreItems = useCallback(
+    (startIndex: number, stopIndex: number) => {
+      // todo @dimazoll - remove console.log
+      console.log('loadMoreItems: ', startIndex, stopIndex);
+      dispatch(
+        fetchCurrencyDataAction({
+          paging: { limit: stopIndex - startIndex + 1, offset: startIndex },
+        }),
+      );
+    },
+    [dispatch],
+  );
 
   const {
     getTableProps,
@@ -65,14 +87,38 @@ export function CurrencyTable(props: CurrencyTableProps) {
     rows,
     totalColumnsWidth,
     prepareRow,
+    state: { sortBy },
   } = useTable(
     {
       columns,
       data: rowData,
       defaultColumn,
+      manualSortBy: true,
     },
     useBlockLayout,
+    useSortBy,
+    //  todo @dimazoll - add filters
   );
+
+  const currentSortingState = useAppSelector((state) => state.currency.sorting);
+  useEffect(() => {
+    const sortingState: SortingParams = sortBy.reduce<SortingParams>(
+      (acc, rule) => {
+        acc[frontToBackColumnNamesMap[rule.id as keyof CurrencyRowData]] =
+          rule.desc ? SortingOrderEnum.DESC : SortingOrderEnum.ASC;
+        return acc;
+      },
+      {},
+    );
+    if (!isEqual(currentSortingState, sortingState)) {
+      if (infiniteLoaderRef.current) {
+        infiniteLoaderRef.current.resetloadMoreItemsCache();
+        // todo @dimazoll - remove console.log
+        console.log(sortingState);
+        dispatch(updateSortingAction(sortingState));
+      }
+    }
+  }, [dispatch, sortBy, currentSortingState]);
 
   const RenderRow = React.useCallback(
     ({ index, style }) => {
@@ -90,7 +136,7 @@ export function CurrencyTable(props: CurrencyTableProps) {
         >
           {row.cells.map((cell) => {
             return (
-              <div {...cell.getCellProps()} className="td">
+              <div {...cell.getCellProps()} className={'m-0 p-0.5'}>
                 {cell.render('Cell')}
               </div>
             );
@@ -104,6 +150,10 @@ export function CurrencyTable(props: CurrencyTableProps) {
   const ids = useAppSelector(selectRowIds);
   const isItemLoaded = React.useCallback(
     (index: number): boolean => {
+      const res = index >= totalCount || index < ids.length;
+      // console.log(
+      //   `isItemLoaded ==> (index: ${index}, totalCount: ${totalCount}, idsLength: ${ids.length}) => (index >= totalCount || index < ids.length = ${res})`,
+      // );
       return index >= totalCount || index < ids.length;
     },
     [ids, totalCount],
@@ -113,10 +163,20 @@ export function CurrencyTable(props: CurrencyTableProps) {
     <div {...getTableProps()} className={classnames(props.className)}>
       <div>
         {headerGroups.map((headerGroup) => (
-          <div {...headerGroup.getHeaderGroupProps()} className="tr">
+          <div {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
-              <div {...column.getHeaderProps()} className="th">
+              <div
+                {...column.getHeaderProps(column.getSortByToggleProps())}
+                className="m-0 p-0.5 select-none"
+              >
                 {column.render('Header')}
+                <span>
+                  {column.isSorted
+                    ? column.isSortedDesc
+                      ? ' \u1401'
+                      : ' \u1403'
+                    : ''}
+                </span>
               </div>
             ))}
           </div>
@@ -127,6 +187,7 @@ export function CurrencyTable(props: CurrencyTableProps) {
         <AutoSizer disableWidth>
           {({ height }) => (
             <InfiniteLoader
+              ref={infiniteLoaderRef}
               isItemLoaded={isItemLoaded}
               loadMoreItems={loadMoreItems}
               itemCount={totalCount}

@@ -5,13 +5,15 @@ import { AppEpic } from './store';
 import {
   fetchCurrencyCodesEpic,
   fetchCurrencyDataEpic,
-  initCurrencySliceEpic,
+  initCurrencyDataEpic,
+  refetchDataOnSorting,
 } from '../features/currency/currencySlice';
 
 const epics = [
-  initCurrencySliceEpic,
+  initCurrencyDataEpic,
   fetchCurrencyDataEpic,
   fetchCurrencyCodesEpic,
+  refetchDataOnSorting,
 ];
 
 export const rootEpic: AppEpic = (action$, state$, deps) => {

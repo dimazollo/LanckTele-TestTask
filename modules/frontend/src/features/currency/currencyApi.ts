@@ -25,6 +25,9 @@ export const fetchCurrencyData = async (
       };
       return acc;
     }, effectiveParams);
+    // todo @dimazoll - remove console.log expressions
+    console.log('effectiveParams.paging', effectiveParams.paging);
+    console.log('effectiveParams.sorting', effectiveParams.sorting);
   }
 
   const sortBy = getTypedObjectKeys(effectiveParams.sorting).map(

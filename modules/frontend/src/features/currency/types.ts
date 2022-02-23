@@ -6,6 +6,7 @@ export type Id = string;
 export enum SortingColumnEnum {
   START_DATE = 'start_date',
   CURRENCY_CODE = 'currency_code',
+  CURRENCY_RATE = 'rate',
 }
 
 export enum SortingOrderEnum {
@@ -23,11 +24,13 @@ export interface PagingParams {
   offset: number;
 }
 
-export type SortingParams = Record<SortingColumnEnum, SortingOrderEnum>;
+export type SortingParams = Partial<
+  Record<SortingColumnEnum, SortingOrderEnum>
+>;
 
 export interface FetchCurrencyDataParameters {
   filters?: FilterParams;
-  sorting?: Partial<SortingParams>;
+  sorting?: SortingParams;
   paging?: Partial<PagingParams>;
 }
 

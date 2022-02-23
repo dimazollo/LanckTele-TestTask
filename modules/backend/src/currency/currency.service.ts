@@ -23,7 +23,7 @@ export class CurrencyService {
     sortingParams: Record<string, SortingOrderEnum.ASC | SortingOrderEnum.DESC>,
     filterParams: FilterParams,
   ): Promise<[CurrencyRate[], number]> {
-    const defaultItemsLimit = 5;
+    const defaultItemsLimit = 20;
     let queryBuilder = this.currencyRateRepository
       .createQueryBuilder('currency_rate')
       .select(
